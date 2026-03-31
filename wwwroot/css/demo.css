@@ -1,0 +1,60 @@
+ /*custom style css*/
+ /*1 ::header styles::  */
+ 
+ .layout-navbar .navbar-dropdown.dropdown-shortcuts .dropdown-shortcuts-list {
+     overflow: auto;
+ }
+ 
+ .list-group.list-group-flush {
+     overflow: auto;
+     max-height: 30rem;
+ }
+ 
+ table.dataTable.dtr-column>tbody>tr>td.control:before,
+ table.dataTable.dtr-column>tbody>tr>th.control:before {
+     background-color: #696cff;
+     border: 2px solid #fff;
+     box-shadow: 0 0 3px rgba(34, 48, 62, .8);
+ }
+ /****app invoice*****/
+ 
+ @media(max-width: 575.98px) {
+     .invoice-edit .invoice-preview-card .invoice-calculations,
+     .invoice-add .invoice-preview-card .invoice-calculations {
+         width: 100%
+     }
+ }
+ 
+ @media(min-width: 768px) {
+     .invoice-edit .repeater-title,
+     .invoice-add .repeater-title {
+         position: absolute;
+         top: -2.4rem
+     }
+ }
+ 
+ .invoice-edit .invoice-preview-card .repeater-wrapper:not(:last-child),
+ .invoice-add .invoice-preview-card .repeater-wrapper:not(:last-child) {
+     margin-bottom: 1.5rem
+ }
+ 
+ @media print {
+     .invoice-edit hr,
+     .invoice-add hr {
+         margin-top: 1rem !important;
+         margin-bottom: 1rem !important
+     }
+ }
+ 
+ .invoice-preview .invoice-preview-header,
+ .invoice-edit .invoice-preview-header,
+ .invoice-add .invoice-preview-header {
+     background-color: rgba(34, 48, 62, .06)
+ }
+ 
+ .dark-style .invoice-preview .invoice-preview-header,
+ .dark-style .invoice-edit .invoice-preview-header,
+ .dark-style .invoice-add .invoice-preview-header {
+     background-color: rgba(230, 230, 241, .06)
+ }
+ /****app invoice*****/

@@ -1,0 +1,1 @@
+{"version":3,"sources":["app-invoice-print.js"],"names":["window","print"],"mappings":";;AAAAA,MAAM,CAACC,KAAP","sourcesContent":["window.print();"],"file":"app-invoice-print.dev.js"}

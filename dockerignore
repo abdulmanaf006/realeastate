@@ -1,0 +1,7 @@
+bin/
+obj/
+.git/
+temp-folder/
+node_modules/
+Dockerfile
+.dockerignore

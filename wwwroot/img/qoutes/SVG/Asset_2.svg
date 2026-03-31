@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288.3 246.37">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ea2126;
+      }
+
+      .cls-2 {
+        fill: #fff;
+        font-family: Poppins-SemiBold, Poppins;
+        font-size: 19.16px;
+        font-weight: 600;
+      }
+
+      .cls-3 {
+        fill: #606060;
+      }
+
+      .cls-4 {
+        fill: #191919;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer_1">
+    <g>
+      <g>
+        <path class="cls-3" d="M283.22,126.84l-11.41,12.78c-7.36,8.24-20.01,8.96-28.25,1.6L84.54,0h86.06l111.02,98.59c8.24,7.36,8.95,20.01,1.6,28.25Z"/>
+        <path class="cls-4" d="M236.82,179.05l-11.41,12.78c-7.36,8.24-20.01,8.96-28.25,1.6L0,19.24V0h64.54l170.67,150.8c8.25,7.36,8.96,20.01,1.61,28.25Z"/>
+        <path class="cls-1" d="M186.79,226.91l-11.41,12.77c-7.36,8.25-20.01,8.96-28.25,1.61L0,115.09V39.81l185.19,158.84c8.24,7.36,8.95,20,1.6,28.25Z"/>
+      </g>
+      <text class="cls-2" transform="translate(168.72 47.53) rotate(42.59)"><tspan x="0" y="0">TRUST</tspan></text>
+      <text class="cls-2" transform="translate(79.83 56.51) rotate(42.59)"><tspan x="0" y="0">COMMITMENT</tspan></text>
+      <text class="cls-2" transform="translate(52.38 126.52) rotate(42.59)"><tspan x="0" y="0">SERVICES</tspan></text>
+    </g>
+  </g>
+</svg>

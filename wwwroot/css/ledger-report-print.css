@@ -1,0 +1,128 @@
+/* Ledger Statement — print layout (Print.cshtml) */
+@page {
+    size: A4;
+    margin: 14mm 12mm 18mm 12mm;
+}
+
+@media print {
+    .print-root {
+        font-size: 12px;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 12px 14px 24px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.35;
+    color: #111;
+    background: #fff;
+}
+
+.print-header {
+    text-align: center;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #000;
+}
+
+.print-logo-wrap {
+    margin-bottom: 8px;
+}
+
+.print-logo {
+    max-height: 48px;
+    max-width: 160px;
+    object-fit: contain;
+}
+
+.company-name {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.company-address {
+    font-size: 11px;
+    color: #222;
+    margin-top: 4px;
+    white-space: pre-line;
+}
+
+.report-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 10px 0 6px;
+}
+
+.ledger-account {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.period {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.opening-line {
+    margin-top: 8px;
+    font-size: 12px;
+}
+
+.print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 12px;
+}
+
+.print-table th,
+.print-table td {
+    border: 1px solid #333;
+    padding: 5px 6px;
+    vertical-align: top;
+}
+
+.print-table thead th {
+    background: #f0f0f0;
+    font-weight: 600;
+    text-align: left;
+}
+
+.print-table .col-si { width: 2.2rem; }
+.print-table .col-date { width: 5.5rem; white-space: nowrap; }
+.print-table .col-ref { min-width: 5rem; }
+.print-table .col-doc { min-width: 4.5rem; white-space: nowrap; }
+.print-table .col-desc { min-width: 6rem; }
+.print-table .col-num { width: 4.5rem; }
+
+.print-table .text-end {
+    text-align: right;
+}
+
+.print-footer {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid #000;
+    font-size: 12px;
+}
+
+.footer-totals {
+    font-weight: normal;
+}
+
+.footer-totals .sep {
+    margin: 0 6px;
+    color: #666;
+}
+
+.page-num {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #444;
+}

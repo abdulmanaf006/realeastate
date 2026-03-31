@@ -1,0 +1,68 @@
+/* App overrides on top of Sneat theme */
+.content-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+a.quick-link-tile {
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+a.quick-link-tile:hover {
+    border-color: rgba(105, 108, 255, 0.45) !important;
+    box-shadow: 0 0.125rem 0.5rem rgba(105, 108, 255, 0.12);
+    background-color: rgba(105, 108, 255, 0.04);
+}
+
+/* ASP.NET Core: hide placeholders when there are no errors (avoids empty red alert boxes / stray spacing) */
+.validation-summary-valid {
+    display: none;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+/* Icon-only table action buttons */
+.btn.btn-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Global datagrid consistency across all modules */
+.table-responsive {
+    border: 1px solid rgba(67, 89, 113, 0.12);
+    border-radius: 0.5rem;
+    background-color: #fff;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table > :not(caption) > * > th {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    border-bottom-width: 1px;
+}
+
+.table > :not(caption) > * > th,
+.table > :not(caption) > * > td {
+    padding: 0.65rem 0.75rem;
+    vertical-align: middle;
+}
+
+.table thead.table-light th {
+    background-color: #f8f9fa;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(105, 108, 255, 0.04);
+}

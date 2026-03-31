@@ -1,0 +1,10 @@
+/* Screen layout for Ledger Statement (Index) */
+.ledger-statement-table th {
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}
+
+.ledger-statement-table td {
+    font-size: 0.875rem;
+    vertical-align: middle;
+}
