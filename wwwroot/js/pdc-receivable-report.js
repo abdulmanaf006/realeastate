@@ -44,7 +44,7 @@
         if (canEdit && r.canClear) {
             var clearUrl = cfg.redirectToJournalUrl + '?rowKey=' + encodeURIComponent(rk);
             return '<td class="text-end text-nowrap d-print-none">' +
-                '<a class="btn btn-sm btn-primary pdc-clear-link" href="' + clearUrl + '" onclick="return confirm(\'Create a journal voucher to clear this PDC cheque? You will be redirected to Journal Voucher.\');">' +
+                '<a class="btn btn-sm btn-primary pdc-clear-link" href="' + clearUrl + '" data-app-confirm="Create a journal voucher to clear this PDC cheque? You will be redirected to Journal Voucher." data-app-confirm-title="Clear PDC">' +
                 '<i class="bx bx-right-arrow-alt me-1"></i> Clear</a></td>';
         }
         if (canViewJ && r.journalVoucherId) {

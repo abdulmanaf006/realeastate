@@ -238,13 +238,15 @@ $(function () {
                 });
             },
             hide: function (deleteElement) {
-                if (confirm("Remove this line item?")) {
-                    deleteElement();
-                    setTimeout(function () {
-                        recalcTotals();
-                        updateDirty();
-                    }, 0);
-                }
+                window.AppDialog.confirm("Remove this line item?", { title: "Remove line item", danger: false }).then(function (ok) {
+                    if (ok) {
+                        deleteElement();
+                        setTimeout(function () {
+                            recalcTotals();
+                            updateDirty();
+                        }, 0);
+                    }
+                });
             }
         });
     }
@@ -353,12 +355,12 @@ $(function () {
                             setPristine();
                             recalcTotals();
                         } else {
-                            alert((r && r.error) ? r.error : "Could not save invoice.");
+                            window.AppDialog.alert((r && r.error) ? r.error : "Could not save invoice.", { title: 'Error', variant: 'danger' });
                             $btn.prop("disabled", false);
                         }
                     })
                     .fail(function () {
-                        alert("Could not save invoice.");
+                        window.AppDialog.alert("Could not save invoice.", { title: 'Error', variant: 'danger' });
                         $btn.prop("disabled", false);
                     });
             });

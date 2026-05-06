@@ -35,7 +35,7 @@
                 }
             })
             .fail(function () {
-                alert('Unable to load units for this building.');
+                window.AppDialog.alert('Unable to load units for this building.', { title: 'Error', variant: 'danger' });
             });
     }
 
@@ -127,16 +127,13 @@
 
     function addPaymentRow() {
         var idx = $('#paymentsBody tr').length;
-        var cashLedgers = window.trReg.cashLedgerOptionsHtml || '';
-        var bankLedgers = window.trReg.bankLedgerOptionsHtml || '';
+        var ledgerInner = window.trReg.payLedgerOptionsCombinedHtml || '';
         var today = new Date().toISOString().slice(0, 10);
         var $tr = $('<tr class="payment-row"/>');
         $tr.append(
             '<td><select class="form-select form-select-sm pay-type-select" name="Payments[' + idx + '].PaymentType">' +
             '<option value="Cash" selected>Cash</option><option value="Bank">Bank</option><option value="Cheque">Cheque</option><option value="CreditCard">Credit card</option></select></td>' +
-            '<td class="pay-ledger-cell">' +
-            '<div class="pay-col-cash"><select class="form-select form-select-sm pay-ledger-cash" name="Payments[' + idx + '].CashBankLedgerId">' + cashLedgers + '</select></div>' +
-            '<div class="pay-col-bank d-none"><select class="form-select form-select-sm pay-ledger-bank" name="Payments[' + idx + '].CashBankLedgerId" disabled>' + bankLedgers + '</select></div></td>' +
+            '<td class="pay-ledger-cell"><select class="form-select form-select-sm pay-ledger-combined" name="Payments[' + idx + '].CashBankLedgerId">' + ledgerInner + '</select></td>' +
             '<td><input type="text" class="form-control form-control-sm" name="Payments[' + idx + '].ChequeNo" placeholder="—" /></td>' +
             '<td><input type="date" class="form-control form-control-sm" name="Payments[' + idx + '].ChequeDate" /></td>' +
             '<td><input type="number" step="0.01" min="0" class="form-control form-control-sm inp-pay-amt" name="Payments[' + idx + '].Amount" value="0" placeholder="0.00" /></td>' +
@@ -145,26 +142,8 @@
             '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-rm-pay" title="Remove line">&times;</button></td>'
         );
         $('#paymentsBody').append($tr);
-        updatePaymentLedgerRow($tr);
         recalcPaymentSectionTotals();
     }
-
-    function updatePaymentLedgerRow($row) {
-        var pt = $row.find('.pay-type-select').val();
-        var isCash = pt === 'Cash';
-        var $cashWrap = $row.find('.pay-col-cash');
-        var $bankWrap = $row.find('.pay-col-bank');
-        var $cashSel = $row.find('.pay-ledger-cash');
-        var $bankSel = $row.find('.pay-ledger-bank');
-        $cashSel.prop('disabled', !isCash);
-        $bankSel.prop('disabled', isCash);
-        $cashWrap.toggleClass('d-none', !isCash);
-        $bankWrap.toggleClass('d-none', isCash);
-    }
-
-    $(document).on('change', '.pay-type-select', function () {
-        updatePaymentLedgerRow($(this).closest('tr'));
-    });
 
     function addBuildingUnitRow() {
         var $tb = $('#buildingUnitsBody');
@@ -209,29 +188,41 @@
     }
 
     function bindBuildingSearch() {
-        $('#buildingSearchInput').on('input', function () {
-            var q = $(this).val();
+        var $input = $('#buildingSearchInput');
+
+        function renderBuildingResults(data) {
+            var $box = $('#buildingSearchResults').empty();
+            (data || []).forEach(function (b) {
+                var $a = $('<a href="#" class="list-group-item list-group-item-action"></a>');
+                var label = (b.buildingNo || '') + ' ' + b.name;
+                $a.text(label.trim() + (b.address ? ' — ' + b.address : ''));
+                $a.data('building', b);
+                $a.on('click', function (e) {
+                    e.preventDefault();
+                    var x = $(this).data('building');
+                    $('#BuildingId').val(x.id);
+                    $('#buildingSelectedLabel').text(x.name);
+                    $box.empty();
+                    loadUnitsForBuilding(x.id, false);
+                });
+                $box.append($a);
+            });
+        }
+
+        function fetchBuildings(q, debounceMs) {
             clearTimeout(buildingSearchTimer);
             buildingSearchTimer = setTimeout(function () {
-                $.getJSON(window.trReg.urls.searchBuildings, { q: q }).done(function (data) {
-                    var $box = $('#buildingSearchResults').empty();
-                    (data || []).forEach(function (b) {
-                        var $a = $('<a href="#" class="list-group-item list-group-item-action"></a>');
-                        var label = (b.buildingNo || '') + ' ' + b.name;
-                        $a.text(label.trim() + (b.address ? ' — ' + b.address : ''));
-                        $a.data('building', b);
-                        $a.on('click', function (e) {
-                            e.preventDefault();
-                            var x = $(this).data('building');
-                            $('#BuildingId').val(x.id);
-                            $('#buildingSelectedLabel').text(x.name);
-                            $box.empty();
-                            loadUnitsForBuilding(x.id, false);
-                        });
-                        $box.append($a);
-                    });
-                });
-            }, 250);
+                $.getJSON(window.trReg.urls.searchBuildings, { q: q }).done(renderBuildingResults);
+            }, debounceMs);
+        }
+
+        $input.on('input', function () {
+            fetchBuildings($(this).val(), 250);
+        });
+
+        // Show all buildings immediately when the user clicks/focuses the search box.
+        $input.on('focus click', function () {
+            fetchBuildings($(this).val() || '', 0);
         });
     }
 
@@ -290,17 +281,49 @@
         if ($('#buildingUnitsBody tr').length > 1) $tr.remove();
     });
 
+    function localIsoDate() {
+        var d = new Date();
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+
+    function formatTenantAjaxError(xhr) {
+        var j = xhr.responseJSON;
+        if (!j) return xhr.statusText || 'Request failed.';
+        var base;
+        if (typeof j.message === 'string' && j.message) base = j.message;
+        else if (typeof j.title === 'string' && j.title) base = j.title;
+        else if (typeof j.error === 'string' && j.error) base = j.error;
+        else if (Array.isArray(j.errors) && j.errors.length) base = j.errors.join(' ');
+        else if (j.errors && typeof j.errors === 'object' && !Array.isArray(j.errors)) {
+            var parts = [];
+            Object.keys(j.errors).forEach(function (k) {
+                var arr = j.errors[k];
+                if (Array.isArray(arr)) arr.forEach(function (x) { parts.push(x); });
+            });
+            base = parts.length ? parts.join(' ') : null;
+        }
+        if (!base) base = xhr.statusText || 'Request failed.';
+        if (typeof j.detail === 'string' && j.detail && j.detail !== base && j.detail.length < 400)
+            return base + ' — ' + j.detail;
+        return base;
+    }
+
     $('#btnSaveTenantModal').on('click', function () {
+        var emailTrim = ($('#mt_email').val() || '').trim();
+        var asOf = ($('#mt_asof').val() || '').trim();
         var payload = {
-            name: $('#mt_name').val(),
-            phone: $('#mt_phone').val(),
-            email: $('#mt_email').val() || null,
-            trn: $('#mt_trn').val() || null,
-            emiratesId: $('#mt_emirates').val() || null,
-            addressLine1: $('#mt_address').val() || null,
+            name: ($('#mt_name').val() || '').trim(),
+            phone: ($('#mt_phone').val() || '').trim(),
+            email: emailTrim ? emailTrim : null,
+            trn: ($('#mt_trn').val() || '').trim() || null,
+            emiratesId: ($('#mt_emirates').val() || '').trim() || null,
+            addressLine1: ($('#mt_address').val() || '').trim() || null,
             openingBalance: parseFloat($('#mt_ob').val()) || 0,
             balanceType: $('#mt_balanceType').val(),
-            asOfDate: $('#mt_asof').val(),
+            asOfDate: asOf || localIsoDate(),
             creditLimit: parseFloat($('#mt_credit').val()) || 0,
             staffId: $('#mt_staff').val() ? parseInt($('#mt_staff').val(), 10) : null,
             status: $('#mt_status').is(':checked')
@@ -317,25 +340,25 @@
             $('#tenantSelectedLabel').text(res.tenant.name + ' (' + res.tenant.code + ')');
             $('#tenantMobileDisplay').text(res.tenant.phone);
         }).fail(function (xhr) {
-            alert('Unable to save tenant: ' + (xhr.responseJSON && xhr.responseJSON.title ? xhr.responseJSON.title : xhr.statusText));
+            window.AppDialog.alert('Unable to save tenant: ' + formatTenantAjaxError(xhr), { title: 'Error', variant: 'danger' });
         });
     });
 
     $('#btnSaveBuildingModal').on('click', function () {
         var name = ($('#mb_name').val() || '').trim();
         if (!name) {
-            alert('Building name is required.');
+            window.AppDialog.alert('Building name is required.', { title: 'Validation', variant: 'danger' });
             return;
         }
 
         var cashId = parseInt($('#mb_cash').val(), 10);
         var bankId = parseInt($('#mb_bank').val(), 10);
         if (!cashId || !bankId) {
-            alert('Select both a cash ledger and a bank ledger.');
+            window.AppDialog.alert('Select both a cash ledger and a bank ledger.', { title: 'Validation', variant: 'danger' });
             return;
         }
         if (cashId === bankId) {
-            alert('Cash ledger and bank ledger must be different.');
+            window.AppDialog.alert('Cash ledger and bank ledger must be different.', { title: 'Validation', variant: 'danger' });
             return;
         }
 
@@ -354,7 +377,7 @@
 
         for (var i = 0; i < units.length; i++) {
             if (!units[i].flatNo) {
-                alert('Unit number (flat no.) is required for each unit row.');
+                window.AppDialog.alert('Unit number (flat no.) is required for each unit row.', { title: 'Validation', variant: 'danger' });
                 return;
             }
         }
@@ -379,13 +402,7 @@
             $('#buildingSelectedLabel').text(res.building.buildingName);
             loadUnitsForBuilding(res.building.id, false);
         }).fail(function (xhr) {
-            var msg = 'Unable to save building.';
-            if (xhr.responseJSON) {
-                if (xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                else if (xhr.responseJSON.error) msg = xhr.responseJSON.error;
-                else if (xhr.responseJSON.title) msg = xhr.responseJSON.title;
-            }
-            alert(msg);
+            window.AppDialog.alert('Unable to save building: ' + formatTenantAjaxError(xhr), { title: 'Error', variant: 'danger' });
         });
     });
 
@@ -419,9 +436,6 @@
         }
         $('.charge-payment-row').each(function () {
             updateChargePaymentRow($(this));
-        });
-        $('#paymentsBody tr.payment-row').each(function () {
-            updatePaymentLedgerRow($(this));
         });
         recalcPaymentSectionTotals();
     });

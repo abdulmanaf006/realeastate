@@ -26,6 +26,7 @@
       partyId: nullIfInt($('#Filter_PartyId').val()),
       statusFilter: emptyToNull($('#Filter_StatusFilter').val()),
       paymentType: emptyToNull($('#Filter_PaymentType').val()),
+      renewalStatus: emptyToNull($('#Filter_RenewalStatus').val()),
       showAll: $('#Filter_ShowAll').is(':checked')
     };
   }
@@ -41,6 +42,7 @@
     if (f.partyId != null) p.set('PartyId', String(f.partyId));
     if (f.statusFilter) p.set('StatusFilter', f.statusFilter);
     if (f.paymentType) p.set('PaymentType', f.paymentType);
+    if (f.renewalStatus) p.set('RenewalStatus', f.renewalStatus);
     p.set('ShowAll', f.showAll ? 'true' : 'false');
     return p.toString();
   }
@@ -77,6 +79,13 @@
       html += '<td>' + esc(r.paymentType) + '</td>';
       if (reportKey === 'contract-expiry') {
         html += '<td class="text-end">' + (r.daysRemaining != null ? esc(String(r.daysRemaining)) : '—') + '</td>';
+        html += '<td>' + esc(r.renewalStatusLabel) + '</td>';
+        html +=
+          '<td>' +
+          (r.renewalFollowUpDate && r.renewalFollowUpDate.length >= 10
+            ? esc(r.renewalFollowUpDate.substring(0, 10))
+            : '—') +
+          '</td>';
       }
       if (reportKey === 'security-deposit') {
         html += '<td class="text-end">' + fmtN(r.depositAmount) + '</td>';
@@ -106,7 +115,7 @@
       html =
         '<tr><td colspan="6" class="text-end">Totals</td><td class="text-end">' +
         fmtN(r.totalContractAmount) +
-        '</td><td colspan="3"></td><td></td></tr>';
+        '</td><td colspan="2"></td><td></td><td colspan="2"></td><td></td></tr>';
     } else if (reportKey === 'security-deposit') {
       html =
         '<tr><td colspan="6" class="text-end">Totals</td><td class="text-end">' +
@@ -149,16 +158,26 @@
       })
         .done(function (resp) {
           if (resp.errorMessage) {
-            alert(resp.errorMessage);
+            window.AppDialog.alert(resp.errorMessage, { title: 'Notice', variant: 'danger' });
             return;
           }
           renderRows(resp, cfg.reportKey);
           renderTotals(resp, cfg.reportKey);
+          var rowCount = (resp.rows || []).length;
+          var gate = cfg.reportKey === 'commission' || cfg.reportKey === 'registration-fees';
+          if (gate) {
+            var has = rowCount > 0;
+            var $empty = $('#reportEmptyState');
+            var $card = $('#reportResultsCard');
+            if ($empty.length) $empty.toggleClass('d-none', has);
+            if ($card.length) $card.toggleClass('d-none', !has);
+            $('#reportPrintBtn').prop('disabled', !has);
+          }
         })
         .fail(function (xhr) {
           var msg = 'Search failed.';
           if (xhr.responseJSON && xhr.responseJSON.title) msg = xhr.responseJSON.title;
-          alert(msg);
+          window.AppDialog.alert(msg, { title: 'Error', variant: 'danger' });
         });
     });
 

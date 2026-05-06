@@ -1,3 +1,8 @@
+/* App modal dialogs (app-dialogs.js) */
+.app-dialog .app-dialog-body {
+    white-space: pre-wrap;
+}
+
 /* App overrides on top of Sneat theme */
 .content-footer {
     padding-left: 1rem;
@@ -36,7 +41,7 @@ a.quick-link-tile:hover {
 /* Global datagrid consistency across all modules */
 .table-responsive {
     border: 1px solid rgba(67, 89, 113, 0.12);
-    border-radius: 0.5rem;
+    border-radius: 0.5rem 0.5rem ;
     background-color: #fff;
 }
 
@@ -44,7 +49,7 @@ a.quick-link-tile:hover {
     margin-bottom: 0;
 }
 
-.table > :not(caption) > * > th {
+.table> :not(caption)>*>th {
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -53,8 +58,8 @@ a.quick-link-tile:hover {
     border-bottom-width: 1px;
 }
 
-.table > :not(caption) > * > th,
-.table > :not(caption) > * > td {
+.table> :not(caption)>*>th,
+.table> :not(caption)>*>td {
     padding: 0.65rem 0.75rem;
     vertical-align: middle;
 }
@@ -65,4 +70,129 @@ a.quick-link-tile:hover {
 
 .table tbody tr:hover {
     background-color: rgba(105, 108, 255, 0.04);
+}
+
+footer {
+    display: flex;
+    background: #fff;
+    padding: 16px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+footer a{
+   color: #191919 !important;
+   text-decoration: underline !important;
+   font-weight: 500;
+}
+
+.tcs-table  {
+    margin: 12px 24px;
+    padding: 0;
+}
+
+.tcs-table  table th {
+        background-color: #f8f9fa;
+      border-top: 0;
+    border-bottom: 0;
+}
+.tcs-table  table tr:last-child td {
+   border-bottom: 0;
+}
+.form-control[readonly] {
+    background-color: #f8f9fa;
+}
+
+/* Master → Ledgers: system ledger help (Bootstrap tooltip, portaled to body) */
+.ledger-system-tooltip .tooltip-inner {
+    max-width: min(90vw, 28rem);
+    text-align: left;
+}
+
+/* Unified UI skin across modules */
+:root {
+    --ui-radius: 0.5rem;
+    --ui-border: rgba(67, 89, 113, 0.16);
+    --ui-soft-bg: #f8f9fb;
+    --ui-focus: rgba(105, 108, 255, 0.2);
+}
+
+.card {
+    border-radius: var(--ui-radius);
+    border-color: var(--ui-border);
+    box-shadow: 0 0.125rem 0.5rem rgba(67, 89, 113, 0.08);
+}
+
+.card .card-header {
+    border-bottom-color: var(--ui-border);
+    background-color: #fff;
+    font-weight: 600;
+}
+
+.form-control,
+.form-select,
+.input-group-text,
+.btn,
+.alert,
+.dropdown-menu,
+.list-group-item {
+    border-radius: var(--ui-radius);
+}
+
+.form-control,
+.form-select {
+    border-color: var(--ui-border);
+    min-height: 2.5rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: rgba(105, 108, 255, 0.45);
+    box-shadow: 0 0 0 0.2rem var(--ui-focus);
+}
+
+.btn {
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.btn-primary,
+.btn-outline-primary,
+.btn-secondary,
+.btn-outline-secondary,
+.btn-success,
+.btn-outline-success,
+.btn-danger,
+.btn-outline-danger {
+    min-height: 2.35rem;
+}
+
+.alert {
+    border: 1px solid var(--ui-border);
+}
+
+.dropdown-menu {
+    border-color: var(--ui-border);
+    box-shadow: 0 0.35rem 1.2rem rgba(67, 89, 113, 0.14);
+}
+
+.dropdown-item {
+    border-radius: 0.4rem;
+}
+
+.table-responsive {
+    border-radius: var(--ui-radius);
+}
+
+.table > :not(caption) > * > th {
+    background-color: var(--ui-soft-bg);
+}
+
+.table td .form-control,
+.table td .form-select {
+    min-height: 2.2rem;
+}
+
+.badge {
+    font-weight: 600;
 }

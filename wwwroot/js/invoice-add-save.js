@@ -65,11 +65,11 @@ $(function () {
                 if (r && r.ok) {
                     window.location.href = "app-invoice-list.php";
                 } else {
-                    alert(r && r.error ? r.error : "Could not save invoice.");
+                    window.AppDialog.alert(r && r.error ? r.error : "Could not save invoice.", { title: 'Error', variant: 'danger' });
                 }
             })
             .fail(function () {
-                alert("Could not save invoice.");
+                window.AppDialog.alert("Could not save invoice.", { title: 'Error', variant: 'danger' });
             });
     });
 });

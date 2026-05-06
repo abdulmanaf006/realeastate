@@ -35,7 +35,7 @@
                 }
             })
             .fail(function () {
-                alert('Unable to load units for this building.');
+                window.AppDialog.alert('Unable to load units for this building.', { title: 'Error', variant: 'danger' });
             });
     }
 
@@ -127,16 +127,13 @@
 
     function addPaymentRow() {
         var idx = $('#paymentsBody tr').length;
-        var cashLedgers = window.lrReg.cashLedgerOptionsHtml || '';
-        var bankLedgers = window.lrReg.bankLedgerOptionsHtml || '';
+        var ledgerInner = window.lrReg.payLedgerOptionsCombinedHtml || '';
         var today = new Date().toISOString().slice(0, 10);
         var $tr = $('<tr class="payment-row"/>');
         $tr.append(
             '<td><select class="form-select form-select-sm pay-type-select" name="Payments[' + idx + '].PaymentType">' +
             '<option value="Cash" selected>Cash</option><option value="Bank">Bank</option><option value="Cheque">Cheque</option><option value="CreditCard">Credit card</option></select></td>' +
-            '<td class="pay-ledger-cell">' +
-            '<div class="pay-col-cash"><select class="form-select form-select-sm pay-ledger-cash" name="Payments[' + idx + '].CashBankLedgerId">' + cashLedgers + '</select></div>' +
-            '<div class="pay-col-bank d-none"><select class="form-select form-select-sm pay-ledger-bank" name="Payments[' + idx + '].CashBankLedgerId" disabled>' + bankLedgers + '</select></div></td>' +
+            '<td class="pay-ledger-cell"><select class="form-select form-select-sm pay-ledger-combined" name="Payments[' + idx + '].CashBankLedgerId">' + ledgerInner + '</select></td>' +
             '<td><input type="text" class="form-control form-control-sm" name="Payments[' + idx + '].ChequeNo" placeholder="—" /></td>' +
             '<td><input type="date" class="form-control form-control-sm" name="Payments[' + idx + '].ChequeDate" /></td>' +
             '<td><input type="number" step="0.01" min="0" class="form-control form-control-sm inp-pay-amt" name="Payments[' + idx + '].Amount" value="0" placeholder="0.00" /></td>' +
@@ -145,26 +142,8 @@
             '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-rm-pay" title="Remove line">&times;</button></td>'
         );
         $('#paymentsBody').append($tr);
-        updatePaymentLedgerRow($tr);
         recalcPaymentSectionTotals();
     }
-
-    function updatePaymentLedgerRow($row) {
-        var pt = $row.find('.pay-type-select').val();
-        var isCash = pt === 'Cash';
-        var $cashWrap = $row.find('.pay-col-cash');
-        var $bankWrap = $row.find('.pay-col-bank');
-        var $cashSel = $row.find('.pay-ledger-cash');
-        var $bankSel = $row.find('.pay-ledger-bank');
-        $cashSel.prop('disabled', !isCash);
-        $bankSel.prop('disabled', isCash);
-        $cashWrap.toggleClass('d-none', !isCash);
-        $bankWrap.toggleClass('d-none', isCash);
-    }
-
-    $(document).on('change', '.pay-type-select', function () {
-        updatePaymentLedgerRow($(this).closest('tr'));
-    });
 
     function addBuildingUnitRow() {
         var $tb = $('#buildingUnitsBody');
@@ -183,55 +162,79 @@
     }
 
     function bindLandlordSearch() {
-        $('#landlordSearchInput').on('input', function () {
-            var q = $(this).val();
+        var $input = $('#landlordSearchInput');
+
+        function renderLandlordResults(data) {
+            var $box = $('#landlordSearchResults').empty();
+            (data || []).forEach(function (l) {
+                var $a = $('<a href="#" class="list-group-item list-group-item-action"></a>');
+                $a.text(l.code + ' — ' + l.name + ' — ' + l.phone);
+                $a.data('landlord', l);
+                $a.on('click', function (e) {
+                    e.preventDefault();
+                    var x = $(this).data('landlord');
+                    $('#LandlordId').val(x.id);
+                    $('#landlordSelectedLabel').text(x.name + ' (' + x.code + ')');
+                    $('#landlordMobileDisplay').text(x.phone);
+                    $box.empty();
+                });
+                $box.append($a);
+            });
+        }
+
+        function fetchLandlords(q, debounceMs) {
             clearTimeout(landlordSearchTimer);
             landlordSearchTimer = setTimeout(function () {
-                $.getJSON(window.lrReg.urls.searchLandlords, { q: q }).done(function (data) {
-                    var $box = $('#landlordSearchResults').empty();
-                    (data || []).forEach(function (l) {
-                        var $a = $('<a href="#" class="list-group-item list-group-item-action"></a>');
-                        $a.text(l.code + ' — ' + l.name + ' — ' + l.phone);
-                        $a.data('landlord', l);
-                        $a.on('click', function (e) {
-                            e.preventDefault();
-                            var x = $(this).data('landlord');
-                            $('#LandlordId').val(x.id);
-                            $('#landlordSelectedLabel').text(x.name + ' (' + x.code + ')');
-                            $('#landlordMobileDisplay').text(x.phone);
-                            $box.empty();
-                        });
-                        $box.append($a);
-                    });
-                });
-            }, 250);
+                $.getJSON(window.lrReg.urls.searchLandlords, { q: q }).done(renderLandlordResults);
+            }, debounceMs);
+        }
+
+        $input.on('input', function () {
+            fetchLandlords($(this).val(), 250);
+        });
+
+        // Show all landlords immediately when the user clicks/focuses the search box.
+        $input.on('focus click', function () {
+            fetchLandlords($(this).val() || '', 0);
         });
     }
 
     function bindBuildingSearch() {
-        $('#buildingSearchInput').on('input', function () {
-            var q = $(this).val();
+        var $input = $('#buildingSearchInput');
+
+        function renderBuildingResults(data) {
+            var $box = $('#buildingSearchResults').empty();
+            (data || []).forEach(function (b) {
+                var $a = $('<a href="#" class="list-group-item list-group-item-action"></a>');
+                var label = (b.buildingNo || '') + ' ' + b.name;
+                $a.text(label.trim() + (b.address ? ' — ' + b.address : ''));
+                $a.data('building', b);
+                $a.on('click', function (e) {
+                    e.preventDefault();
+                    var x = $(this).data('building');
+                    $('#BuildingId').val(x.id);
+                    $('#buildingSelectedLabel').text(x.name);
+                    $box.empty();
+                    loadUnitsForBuilding(x.id, false);
+                });
+                $box.append($a);
+            });
+        }
+
+        function fetchBuildings(q, debounceMs) {
             clearTimeout(buildingSearchTimer);
             buildingSearchTimer = setTimeout(function () {
-                $.getJSON(window.lrReg.urls.searchBuildings, { q: q }).done(function (data) {
-                    var $box = $('#buildingSearchResults').empty();
-                    (data || []).forEach(function (b) {
-                        var $a = $('<a href="#" class="list-group-item list-group-item-action"></a>');
-                        var label = (b.buildingNo || '') + ' ' + b.name;
-                        $a.text(label.trim() + (b.address ? ' — ' + b.address : ''));
-                        $a.data('building', b);
-                        $a.on('click', function (e) {
-                            e.preventDefault();
-                            var x = $(this).data('building');
-                            $('#BuildingId').val(x.id);
-                            $('#buildingSelectedLabel').text(x.name);
-                            $box.empty();
-                            loadUnitsForBuilding(x.id, false);
-                        });
-                        $box.append($a);
-                    });
-                });
-            }, 250);
+                $.getJSON(window.lrReg.urls.searchBuildings, { q: q }).done(renderBuildingResults);
+            }, debounceMs);
+        }
+
+        $input.on('input', function () {
+            fetchBuildings($(this).val(), 250);
+        });
+
+        // Show all buildings immediately when the user clicks/focuses the search box.
+        $input.on('focus click', function () {
+            fetchBuildings($(this).val() || '', 0);
         });
     }
 
@@ -315,25 +318,25 @@
             $('#landlordSelectedLabel').text(ll.name + ' (' + ll.landlordCode + ')');
             $('#landlordMobileDisplay').text(ll.phone);
         }).fail(function (xhr) {
-            alert('Unable to save landlord: ' + (xhr.responseJSON && xhr.responseJSON.title ? xhr.responseJSON.title : xhr.statusText));
+            window.AppDialog.alert('Unable to save landlord: ' + (xhr.responseJSON && xhr.responseJSON.title ? xhr.responseJSON.title : xhr.statusText), { title: 'Error', variant: 'danger' });
         });
     });
 
     $('#btnSaveBuildingModal').on('click', function () {
         var name = ($('#mb_name').val() || '').trim();
         if (!name) {
-            alert('Building name is required.');
+            window.AppDialog.alert('Building name is required.', { title: 'Validation', variant: 'danger' });
             return;
         }
 
         var cashId = parseInt($('#mb_cash').val(), 10);
         var bankId = parseInt($('#mb_bank').val(), 10);
         if (!cashId || !bankId) {
-            alert('Select both a cash ledger and a bank ledger.');
+            window.AppDialog.alert('Select both a cash ledger and a bank ledger.', { title: 'Validation', variant: 'danger' });
             return;
         }
         if (cashId === bankId) {
-            alert('Cash ledger and bank ledger must be different.');
+            window.AppDialog.alert('Cash ledger and bank ledger must be different.', { title: 'Validation', variant: 'danger' });
             return;
         }
 
@@ -352,7 +355,7 @@
 
         for (var i = 0; i < units.length; i++) {
             if (!units[i].flatNo) {
-                alert('Unit number (flat no.) is required for each unit row.');
+                window.AppDialog.alert('Unit number (flat no.) is required for each unit row.', { title: 'Validation', variant: 'danger' });
                 return;
             }
         }
@@ -383,7 +386,7 @@
                 else if (xhr.responseJSON.error) msg = xhr.responseJSON.error;
                 else if (xhr.responseJSON.title) msg = xhr.responseJSON.title;
             }
-            alert(msg);
+            window.AppDialog.alert(msg, { title: 'Error', variant: 'danger' });
         });
     });
 
@@ -417,9 +420,6 @@
         }
         $('.charge-payment-row').each(function () {
             updateChargePaymentRow($(this));
-        });
-        $('#paymentsBody tr.payment-row').each(function () {
-            updatePaymentLedgerRow($(this));
         });
         recalcPaymentSectionTotals();
     });

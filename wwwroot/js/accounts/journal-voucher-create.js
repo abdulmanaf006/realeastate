@@ -80,7 +80,7 @@
 
         $('#entryTable').on('click', '.delete-row-btn', function () {
             if ($('#entryTable tbody tr').length <= 2) {
-                alert('At least 2 rows are required.');
+                window.AppDialog.alert('At least 2 rows are required.', { title: 'Validation', variant: 'danger' });
                 return;
             }
             $(this).closest('tr').remove();

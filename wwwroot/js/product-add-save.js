@@ -44,7 +44,7 @@ $(function() {
             tags: $("#ecommerce-product-tags").val() || ""
         };
         if (!payload.name) {
-            alert("Please enter a product name.");
+            window.AppDialog.alert("Please enter a product name.", { title: 'Validation', variant: 'danger' });
             return;
         }
         $.ajax({
@@ -57,10 +57,10 @@ $(function() {
             if (r && r.ok) {
                 window.location.href = "app-product-list.php";
             } else {
-                alert((r && r.error) ? r.error : "Could not save product.");
+                window.AppDialog.alert((r && r.error) ? r.error : "Could not save product.", { title: 'Error', variant: 'danger' });
             }
         }).fail(function() {
-            alert("Could not save product.");
+            window.AppDialog.alert("Could not save product.", { title: 'Error', variant: 'danger' });
         });
     });
 });
