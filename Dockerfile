@@ -1,15 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# Pre-built publish output (no .csproj in this repo) — runtime only
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-EXPOSE 10000
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
 
 COPY . .
 
-RUN dotnet publish RealEstate.Web.csproj -c Release -o /app/publish
-
-FROM base AS final
-WORKDIR /app
-COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "RealEstate.Web.dll"]
+EXPOSE 8080
+# Render (and similar) set PORT at runtime; default 8080 for local runs
+CMD dotnet RealEstate.Web.dll --urls "http://0.0.0.0:${PORT:-8080}"
